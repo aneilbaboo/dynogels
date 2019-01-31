@@ -20,7 +20,8 @@ describe('item', () => {
       hashKey: 'num',
       schema: {
         num: Joi.number(),
-        name: Joi.string()
+        name: Joi.string(),
+        obj: Joi.object()
       }
     };
 
@@ -95,6 +96,36 @@ describe('item', () => {
 
         return done();
       });
+    });
+  });
+
+  describe('#set', () => {
+    it('should merge objects by default', () => {
+      Item.mergeObjectsWhenSetting('reset');
+      expect(Item.prototype.set.name).equal('initialSetter');
+
+      const item = new Item({ foo: { a: 1 } });
+      item.set({ foo: { b: 2 } });
+
+      expect(item.get('foo')).to.eql({ a: 1, b: 2 });
+    });
+
+    it('should merge objects after mergeObjectsWhenSetting is called with true', () => {
+      Item.mergeObjectsWhenSetting(true);
+      expect(Item.prototype.set.name).not.equal('initialSetter');
+      const item = new Item({ foo: { a: 1 } });
+      item.set({ foo: { b: 2 } });
+
+      expect(item.get('foo')).to.eql({ a: 1, b: 2 });
+    });
+
+    it('should replace objects after mergeObjectsWhenSetting is called with false', () => {
+      Item.mergeObjectsWhenSetting(false);
+      expect(Item.prototype.set.name).not.equal('initialSetter');
+      const item = new Item({ foo: { a: 1 } });
+      item.set({ foo: { b: 2 } });
+
+      expect(item.get('foo')).to.eql({ b: 2 });
     });
   });
 });
